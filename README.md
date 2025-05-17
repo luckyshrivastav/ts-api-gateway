@@ -51,7 +51,16 @@ A lightweight, extensible API Gateway built with **Node.js + TypeScript**, provi
 |  Retry      | Re-attempt health check on next cycle        |
 
 
+## Setup
 
+Developed on: 
+node v22.15.1, npm 10.9.2
+
+```
+npm install
+npm run build
+npm  start
+```
 
 ## Example Service Registration Payload
 ```
