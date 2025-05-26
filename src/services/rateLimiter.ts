@@ -13,22 +13,27 @@ const getKey = (req: Request): string => {
 };
 
 export const rateLimiterMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const key = getKey(req);
+    const now = Date.now();
+    const entry = rateLimiterStore.get(key);
 
-  const key = getKey(req);
-  const now = Date.now();
-  const entry = rateLimiterStore.get(key);
+    if (!entry || entry.resetTime < now) {
+      rateLimiterStore.set(key, { count: 1, resetTime: now + WINDOW_MS });
+      return next();
+    }
 
-  if (!entry || entry.resetTime < now) {
-    rateLimiterStore.set(key, { count: 1, resetTime: now + WINDOW_MS });
+    if (entry.count >= MAX_REQUESTS) {
+      return res.status(429).json({ error: "Rate limit exceeded" });
+    }
+
+    entry.count++;
+
+    //console.log(`[RateLimiter] ${key} → ${entry?.count}`);
     return next();
+    
+  } catch (error) {
+    return res.status(500).json({error:"Internal Server error"});
   }
-
-  if (entry.count >= MAX_REQUESTS) {
-    return res.status(429).json({ error: "Rate limit exceeded" });
-  }
-
-  entry.count++;
-
-  //console.log(`[RateLimiter] ${key} → ${entry?.count}`);
-  return next();
+  
 };

@@ -6,7 +6,17 @@ export interface ServiceInfo {
 }
 
 class ServiceRegistry {
+  private static instance: ServiceRegistry;
   private services = new Map<string, ServiceInfo>();
+
+  private constructor() {} // Prevent direct instantiation
+
+  static getInstance(): ServiceRegistry {
+    if (!ServiceRegistry.instance) {
+      ServiceRegistry.instance = new ServiceRegistry();
+    }
+    return ServiceRegistry.instance;
+  }
 
   register(service: ServiceInfo) {
     service.healthy = true;
@@ -22,7 +32,7 @@ class ServiceRegistry {
   }
 
   list(): ServiceInfo[] {
-    return Array.from(this.services.values());
+    return structuredClone(Array.from(this.services.values()));
   }
 
   markHealthy(serviceName: string, healthy: boolean) {
@@ -33,4 +43,4 @@ class ServiceRegistry {
   }
 }
 
-export const serviceRegistry = new ServiceRegistry();
+export const serviceRegistry = ServiceRegistry.getInstance();
